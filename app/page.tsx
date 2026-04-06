@@ -275,7 +275,13 @@ export default function PeladaPro() {
   const [modalType, setModalType] = useState<'player' | 'attendance' | 'transaction' | 'group' | null>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [deletingId, setDeletingId] = useState<string | number | null>(null);
-   
+
+  const mensalistas = players.filter(p => p.isMonthly === true && p.status === 'active');
+  const avulsos = players.filter(p => p.isMonthly === false && p.status === 'active');
+
+  const isAdmin = userRole === 'admin';
+  const isPlayer = userRole === 'member'; 
+  
   // Load from Supabase on mount
   useEffect(() => {
     // Auth Listener
@@ -469,11 +475,14 @@ export default function PeladaPro() {
   const monthlyFinanceStats = useMemo(() => {
     const now = new Date();
     const currentMonthStr = format(now, 'yyyy-MM');
-    return transactions.reduce((acc, t) => {
+
+    // 1. Calcula o que REALMENTE entrou e saiu (o que está no banco)
+    const totals = transactions.reduce((acc, t) => {
       try {
         const tDate = typeof t.date === 'string' 
           ? (t.date.includes('T') ? parseISO(t.date) : new Date(t.date + 'T00:00:00')) 
           : new Date(t.date);
+        
         if (format(tDate, 'yyyy-MM') === currentMonthStr) {
           if (t.type === 'income') acc.income += t.amount;
           else acc.expense += t.amount;
@@ -481,7 +490,40 @@ export default function PeladaPro() {
       } catch (e) {}
       return acc;
     }, { income: 0, expense: 0 });
-  }, [transactions]);
+
+    // 2. Calcula quanto os AVULSOS devem (Baseado nas presenças do mês)
+    const dividaAvulsos = attendances.reduce((total, game) => {
+      try {
+        const gameDate = typeof game.date === 'string' ? parseISO(game.date) : new Date(game.date);
+        
+        // Só conta jogos deste mês
+        if (format(gameDate, 'yyyy-MM') === currentMonthStr) {
+          // Filtra quem estava no jogo e é avulso
+          const avulsosPresentes = game.playerIds.filter(id => 
+            avulsos.some(a => String(a.id) === String(id))
+          );
+
+          // Soma o valor da diária de cada um
+          const somaJogo = avulsosPresentes.reduce((sub, id) => {
+            const player = avulsos.find(p => String(p.id) === String(id));
+            return sub + (player?.monthlyFee || 0);
+          }, 0);
+
+          return total + somaJogo;
+        }
+      } catch (e) {}
+      return total;
+    }, 0);
+
+
+    const expectativaMensalistas = mensalistas.reduce((acc, p) => acc + (p.monthlyFee || 0), 0);
+
+    return {
+      ...totals,
+      dividaAvulsos,
+      saldoPendente: expectativaMensalistas + dividaAvulsos - totals.income
+    };
+  }, [transactions, attendances, avulsos, mensalistas]);
 
   const chartData = useMemo(() => {
     // Last 6 months of balance
@@ -960,19 +1002,26 @@ export default function PeladaPro() {
           </div>
 
           <nav className="space-y-2 flex-1">
-            <SidebarItem icon={PieChart} label="Dashboard" id="dashboard" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-            <SidebarItem icon={Users} label="Jogadores" id="players" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-            <SidebarItem icon={Calendar} label="Jogos" id="games" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-            <SidebarItem icon={DollarSign} label="Financeiro" id="finance" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-            <SidebarItem icon={Settings} label="Configurações" id="group" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-            
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-200 mt-4"
-            >
-              <LogOut size={20} />
-              <span className="font-medium">Sair</span>
-            </button>
+ {/* Abas que TODO MUNDO vê */}
+  <SidebarItem icon={PieChart} label="Dashboard" id="dashboard" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+  <SidebarItem icon={Users} label="Jogadores" id="players" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+  <SidebarItem icon={Calendar} label="Jogos" id="games" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+  
+  {/* Abas que SÓ O ADMIN vê */}
+  {isAdmin && (
+    <>
+      <SidebarItem icon={DollarSign} label="Financeiro" id="finance" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+      <SidebarItem icon={Settings} label="Configurações" id="group" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+    </>
+  )}
+  
+  <button
+    onClick={handleLogout}
+    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-200 mt-4"
+  >
+    <LogOut size={20} />
+    <span className="font-medium">Sair</span>
+  </button>
           </nav>
 
           <div className="pt-6 border-t border-gray-100">
@@ -1120,6 +1169,42 @@ export default function PeladaPro() {
                   />
                 </div>
 
+                {/* CÓDIGO DO RANKING  */}
+                
+                <section className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center">
+                      <Users size={24} />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">Ranking de Frequência</h2>
+                      <p className="text-sm text-gray-500">Jogadores mais presentes nas partidas</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {topPlayers.map((player, index) => (
+                      <div
+                        key={player.id}
+                        className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={`text-lg font-black ${
+                            index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : 'text-orange-500'
+                          }`}>
+                            {index + 1}º
+                          </span>
+                          <div>
+                            <p className="font-bold text-gray-900">{player.name}</p>
+                            <p className="text-xs text-gray-500">{player.appearances} partidas</p>
+                          </div>
+                        </div>
+                        {index === 0 && <span className="text-xl">👑</span>}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
                 {/* Charts & Recent Activity */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-50">
@@ -1177,188 +1262,95 @@ export default function PeladaPro() {
                 </div>
               </motion.div>
             )}
-
-            {activeTab === 'players' && (
-              <motion.div
-                key="players"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-2xl font-bold">Jogadores</h3>
-                    <p className="text-gray-500">Gerencie os membros do seu grupo</p>
-                  </div>
-                  {userRole === 'admin' && (
-                    <button 
-                      onClick={() => {
-                        setEditingItem(null);
-                        setModalType('player');
-                      }}
-                      className="bg-black text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-transform"
-                    >
-                      <Plus size={20} />
-                      Novo Jogador
-                    </button>
-                  )}
+{activeTab === 'players' && (
+  <motion.div
+    key="players"
+    initial={{ opacity: 0, x: 20 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -20 }}  
+    className="space-y-8 pb-24"
+  >
+    {/* --- SEÇÃO MENSALISTAS --- */}
+    <section>
+      <div className="flex items-center gap-2 mb-4 px-1">
+        <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
+        <h2 className="text-xl font-bold text-gray-900">Mensalistas ({mensalistas.length})</h2>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {mensalistas.map(player => (
+          <div key={player.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold">
+                {player.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">{player.name}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-semibold text-blue-600">R$ {player.monthlyFee}</p>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                    paidPlayerIds.has(String(player.id)) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
+                    {paidPlayerIds.has(String(player.id)) ? 'Em Dia' : 'Pendente'}
+                  </span>
                 </div>
+              </div>
+            </div>
 
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-50 overflow-hidden">
-                  {/* Desktop Table View */}
-                  <div className="hidden sm:block overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="border-b border-gray-50">
-                          <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400">Jogador</th>
-                          <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400">Tipo</th>
-                          <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
-                          <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400">Pagamento</th>
-                          <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400 text-right">Ações</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-50">
-                        {players.map((player) => (
-                          <tr key={player.id} className="hover:bg-gray-50/50 transition-colors">
-                            <td className="px-8 py-5">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500">
-                                  {player.name.charAt(0)}
-                                </div>
-                                <span className="font-bold">{player.name}</span>
-                              </div>
-                            </td>
-                            <td className="px-8 py-5">
-                              <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                player.isMonthly ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-600'
-                              }`}>
-                                {player.isMonthly ? 'Mensalista' : 'Avulso'}
-                              </span>
-                            </td>
-                            <td className="px-8 py-5">
-                              <button 
-                                onClick={() => togglePlayerStatus(player.id)}
-                                className={`flex items-center gap-2 text-sm font-medium ${
-                                  player.status === 'active' ? 'text-green-600' : 'text-gray-400'
-                                }`}
-                              >
-                                <div className={`w-2 h-2 rounded-full ${player.status === 'active' ? 'bg-green-600' : 'bg-gray-400'}`} />
-                                {player.status === 'active' ? 'Ativo' : 'Inativo'}
-                              </button>
-                            </td>
-                            <td className="px-8 py-5">
-                              {player.isMonthly ? (
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                                  paidPlayerIds.has(String(player.id)) ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-                                }`}>
-                                  {paidPlayerIds.has(String(player.id)) ? 'Em Dia' : 'Pendente'}
-                                </span>
-                              ) : (
-                                <span className="text-gray-300 text-xs">-</span>
-                              )}
-                            </td>
-                              <td className="px-8 py-5 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                {userRole === 'admin' && (
-                                  <>
-                                    <button 
-                                      onClick={() => {
-                                        setEditingItem(player);
-                                        setModalType('player');
-                                      }}
-                                      className="p-2 text-gray-400 hover:text-black transition-colors"
-                                    >
-                                      <Edit size={18} />
-                                    </button>
-                                    <button 
-                                      onClick={() => deletePlayer(player.id)}
-                                      className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                                    >
-                                      <Trash2 size={18} />
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+            {/* PROTEÇÃO AQUI: Só mostra o botão de editar se for admin */}
+            {userRole === 'admin' && (
+              <button onClick={() => { setEditingItem(player); setModalType('player'); }} className="p-2 text-gray-300 hover:text-blue-600 transition-colors">
+                <Edit size={18} />
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
 
-                  {/* Mobile Card View */}
-                  <div className="sm:hidden divide-y divide-gray-50">
-                    {players.map((player) => (
-                      <div key={player.id} className="p-4 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500">
-                              {player.name.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="font-bold">{player.name}</p>
-                              <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                                player.isMonthly ? 'text-blue-600' : 'text-gray-400'
-                              }`}>
-                                {player.isMonthly ? 'Mensalista' : 'Avulso'}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {userRole === 'admin' && (
-                              <>
-                                <button 
-                                  onClick={() => {
-                                    setEditingItem(player);
-                                    setModalType('player');
-                                  }}
-                                  className="p-2 text-gray-400"
-                                >
-                                  <Edit size={18} />
-                                </button>
-                                <button 
-                                  onClick={() => deletePlayer(player.id)}
-                                  className="p-2 text-gray-400"
-                                >
-                                  <Trash2 size={18} />
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between pt-2">
-                          <button 
-                            onClick={() => togglePlayerStatus(player.id)}
-                            className={`flex items-center gap-2 text-sm font-medium ${
-                              player.status === 'active' ? 'text-green-600' : 'text-gray-400'
-                            }`}
-                          >
-                            <div className={`w-2 h-2 rounded-full ${player.status === 'active' ? 'bg-green-600' : 'bg-gray-400'}`} />
-                            {player.status === 'active' ? 'Ativo' : 'Inativo'}
-                          </button>
-                          {player.isMonthly ? (
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              paidPlayerIds.has(String(player.id)) ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-                            }`}>
-                              {paidPlayerIds.has(String(player.id)) ? 'Em Dia' : 'Pendente'}
-                            </span>
-                          ) : (
-                            <span className="font-bold text-gray-600">
-                              R$ {player.monthlyFee.toFixed(2)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+    {/* --- SEÇÃO AVULSOS --- */}
+    <section className="mt-8">
+      <div className="flex items-center gap-2 mb-4 px-1">
+        <div className="w-1.5 h-6 bg-orange-500 rounded-full" />
+        <h2 className="text-xl font-bold text-gray-900">Avulsos ({avulsos.length})</h2>
+      </div>
 
-                  {players.length === 0 && (
-                    <div className="px-8 py-20 text-center text-gray-400">
-                      Nenhum jogador cadastrado. Comece adicionando um!
-                    </div>
-                  )}
-                </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {avulsos.map(player => (
+          <div key={player.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center opacity-90">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center font-bold">
+                {player.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">{player.name}</p>
+                <p className="text-xs font-semibold text-orange-600 uppercase">
+                  R$ {player.monthlyFee} p/ jogo
+                </p>
+              </div>
+            </div>
+
+            {/* PROTEÇÃO AQUI TAMBÉM: Só mostra editar para admin */}
+            {userRole === 'admin' && (
+              <button onClick={() => { setEditingItem(player); setModalType('player'); }} className="p-2 text-gray-300 hover:text-orange-600 transition-colors">
+                <Edit size={18} />
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* Botão Novo Jogador flutuante para Admin */}
+    {userRole === 'admin' && (
+      <button
+        onClick={() => { setEditingItem(null); setModalType('player'); }}
+        className="fixed bottom-6 right-6 bg-black text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 z-50 font-bold hover:scale-105 active:scale-95 transition-transform"
+      >
+        <Plus size={20} />
+        Novo Jogador
+      </button>
+    )}
               </motion.div>
             )}
 
