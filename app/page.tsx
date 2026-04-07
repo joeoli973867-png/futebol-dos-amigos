@@ -64,6 +64,7 @@ type Player = {
   isMonthly: boolean;
   monthlyFee: number;
   lastPaymentDate?: string;
+  phone?: string;
 };
 
 type Attendance = {
@@ -275,10 +276,10 @@ export default function PeladaPro() {
   const [modalType, setModalType] = useState<'player' | 'attendance' | 'transaction' | 'group' | null>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [deletingId, setDeletingId] = useState<string | number | null>(null);
+  const [novoTelefone, setNovoTelefone] = useState('');
 
   const mensalistas = players.filter(p => p.isMonthly === true && p.status === 'active');
   const avulsos = players.filter(p => p.isMonthly === false && p.status === 'active');
-
   const isAdmin = userRole === 'admin';
   const isPlayer = userRole === 'member'; 
   
@@ -681,8 +682,9 @@ export default function PeladaPro() {
       .eq('id', groupId);
   };
 
-  const addPlayer = async (name: string, isMonthly: boolean, fee: number) => {
+  const addPlayer = async (name: string, isMonthly: boolean, fee: number, phone: string) => { 
     if (userRole !== 'admin') return;
+    
     const { data, error } = await supabase
       .from('players')
       .insert([{
@@ -690,6 +692,7 @@ export default function PeladaPro() {
         name,
         is_monthly: isMonthly,
         monthly_fee: fee,
+        phone, // <--- Aqui o telefone é enviado para a coluna 'phone' do seu banco
         status: 'active'
       }])
       .select()
@@ -701,9 +704,13 @@ export default function PeladaPro() {
         name: data.name,
         status: data.status as 'active' | 'inactive',
         isMonthly: data.is_monthly,
-        monthlyFee: Number(data.monthly_fee) || 0
+        monthlyFee: Number(data.monthly_fee) || 0,
+        phone: data.phone // <--- Garante que o telefone apareça na lista sem precisar recarregar
       };
       setPlayers(prev => [...prev, newPlayer].sort((a, b) => a.name.localeCompare(b.name)));
+      
+      // Limpa o estado do telefone para o próximo cadastro
+      setNovoTelefone(''); 
     }
   };
 
@@ -1764,7 +1771,7 @@ export default function PeladaPro() {
                       initialData={editingItem} 
                       onSubmit={(data) => {
                         if (editingItem) updatePlayer(editingItem.id, data);
-                        else addPlayer(data.name, data.isMonthly, data.monthlyFee);
+                        else addPlayer(data.name, data.isMonthly, data.monthlyFee, novoTelefone);
                         setModalType(null);
                       }} 
                     />
@@ -1804,14 +1811,20 @@ export default function PeladaPro() {
 }
 
 // --- Forms ---
-
 function PlayerForm({ initialData, onSubmit }: { initialData?: Player, onSubmit: (data: any) => void }) {
   const [name, setName] = useState(initialData?.name || '');
   const [isMonthly, setIsMonthly] = useState(initialData?.isMonthly ?? true);
   const [fee, setFee] = useState(initialData?.monthlyFee || 50);
+  const [novoTelefone, setNovoTelefone] = useState(initialData?.phone || '');
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ name, isMonthly, monthlyFee: fee }); }} className="space-y-6">
+    <form 
+      onSubmit={(e) => { 
+        e.preventDefault(); 
+        onSubmit({ name, isMonthly, monthlyFee: fee, phone: novoTelefone }); 
+      }} 
+      className="space-y-6"
+    >
       <div className="space-y-2">
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Nome</label>
         <input 
@@ -1823,6 +1836,7 @@ function PlayerForm({ initialData, onSubmit }: { initialData?: Player, onSubmit:
           required
         />
       </div>
+
       <div className="flex items-center gap-4">
         <button 
           type="button"
@@ -1839,6 +1853,7 @@ function PlayerForm({ initialData, onSubmit }: { initialData?: Player, onSubmit:
           Avulso
         </button>
       </div>
+
       <div className="space-y-2">
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Valor (R$)</label>
         <input 
@@ -1852,6 +1867,19 @@ function PlayerForm({ initialData, onSubmit }: { initialData?: Player, onSubmit:
           required
         />
       </div>
+
+      {/* --- NOVO CAMPO DE WHATSAPP --- */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">WhatsApp</label>
+        <input 
+          type="text" 
+          placeholder="(00) 00000-0000"
+          value={novoTelefone}
+          onChange={(e) => setNovoTelefone(e.target.value)}
+          className="w-full px-4 py-3 rounded-xl border border-gray-100 focus:border-black outline-none transition-colors font-bold"
+        />
+      </div>
+
       <button type="submit" className="w-full bg-black text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2">
         <Save size={20} />
         Salvar Jogador
