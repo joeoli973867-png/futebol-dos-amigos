@@ -6,14 +6,14 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 // 2. LISTA COMPLETA DE ÍCONES (Adicionei os que estavam faltando)
-import { 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  TrendingUp, 
-  Plus, 
-  Search, 
-  MoreVertical, 
+import {
+  Users,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  Plus,
+  Search,
+  MoreVertical,
   ChevronRight,
   LayoutDashboard,
   ClipboardList,
@@ -42,12 +42,12 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { Session } from '@supabase/supabase-js';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   LineChart,
   Line
 } from 'recharts';
@@ -102,16 +102,16 @@ const INITIAL_GROUP: GroupInfo = {
 
 // --- Components ---
 
-const SidebarItem = ({ 
-  icon: Icon, 
-  label, 
-  id, 
-  activeTab, 
-  setActiveTab, 
-  setIsSidebarOpen 
-}: { 
-  icon: any, 
-  label: string, 
+const SidebarItem = ({
+  icon: Icon,
+  label,
+  id,
+  activeTab,
+  setActiveTab,
+  setIsSidebarOpen
+}: {
+  icon: any,
+  label: string,
   id: 'dashboard' | 'players' | 'games' | 'finance' | 'group',
   activeTab: string,
   setActiveTab: (id: any) => void,
@@ -119,11 +119,10 @@ const SidebarItem = ({
 }) => (
   <button
     onClick={() => { setActiveTab(id); setIsSidebarOpen(false); }}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-      activeTab === id 
-        ? 'bg-black text-white shadow-lg shadow-black/10' 
-        : 'text-gray-500 hover:bg-gray-100'
-    }`}
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === id
+      ? 'bg-black text-white shadow-lg shadow-black/10'
+      : 'text-gray-500 hover:bg-gray-100'
+      }`}
   >
     <Icon size={20} />
     <span className="font-medium">{label}</span>
@@ -171,7 +170,7 @@ const AuthScreen = ({ onLogin }: { onLogin: (session: Session) => void }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-gray-100"
@@ -189,8 +188,8 @@ const AuthScreen = ({ onLogin }: { onLogin: (session: Session) => void }) => {
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">E-mail</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -204,8 +203,8 @@ const AuthScreen = ({ onLogin }: { onLogin: (session: Session) => void }) => {
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Senha</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="password" 
+              <input
+                type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -216,7 +215,7 @@ const AuthScreen = ({ onLogin }: { onLogin: (session: Session) => void }) => {
           </div>
 
           {error && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               className="bg-red-50 text-red-600 text-sm p-4 rounded-2xl border border-red-100 flex items-start gap-3"
@@ -226,7 +225,7 @@ const AuthScreen = ({ onLogin }: { onLogin: (session: Session) => void }) => {
             </motion.div>
           )}
 
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="w-full bg-black text-white rounded-2xl py-4 font-bold shadow-lg shadow-black/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
@@ -243,7 +242,7 @@ const AuthScreen = ({ onLogin }: { onLogin: (session: Session) => void }) => {
         </form>
 
         <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-          <button 
+          <button
             onClick={() => setIsLogin(!isLogin)}
             className="text-sm font-medium text-gray-500 hover:text-black transition-colors"
           >
@@ -262,7 +261,7 @@ export default function PeladaPro() {
   const [userRole, setUserRole] = useState<'admin' | 'member' | null>(null);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'players' | 'games' | 'finance' | 'group'>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
+
   // State with Supabase persistence
   const [group, setGroup] = useState<GroupInfo & { inviteCode?: string }>(INITIAL_GROUP);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -281,8 +280,25 @@ export default function PeladaPro() {
   const mensalistas = players.filter(p => p.isMonthly === true && p.status === 'active');
   const avulsos = players.filter(p => p.isMonthly === false && p.status === 'active');
   const isAdmin = userRole === 'admin';
-  const isPlayer = userRole === 'member'; 
-  
+  const isPlayer = userRole === 'member';
+
+  const handleWhatsAppClick = (phone: string, name: string) => {
+    if (!phone) {
+      alert("Este jogador não tem um número de WhatsApp cadastrado.");
+      return;
+    }
+    // Remove tudo que não é número
+    const cleanPhone = phone.replace(/\D/g, "");
+
+    // Mensagem padrão de cobrança
+    const message = `Fala ${name}! Beleza? ⚽ Passando pra lembrar da pendência da pelada. Quando puder, fortalece o Pix da galera! Valeu! 👊`;
+
+    // Monta o link (adicionando o 55 do Brasil automaticamente)
+    const url = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+    window.open(url, '_blank');
+  };
+
   // Load from Supabase on mount
   useEffect(() => {
     // Auth Listener
@@ -334,7 +350,7 @@ export default function PeladaPro() {
           .select('*')
           .eq('id', memberData.group_id)
           .single();
-        
+
         if (groupData) {
           setGroup({
             name: groupData.name,
@@ -351,7 +367,7 @@ export default function PeladaPro() {
           .select('*')
           .eq('group_id', memberData.group_id)
           .order('name');
-        
+
         if (playersData) {
           setPlayers(playersData.map(p => ({
             id: p.id,
@@ -368,7 +384,7 @@ export default function PeladaPro() {
           .select('*')
           .eq('group_id', memberData.group_id)
           .order('date', { ascending: false });
-        
+
         if (attendancesData) {
           setAttendances(attendancesData.map(a => ({
             id: a.id,
@@ -384,7 +400,7 @@ export default function PeladaPro() {
           .select('*')
           .eq('group_id', memberData.group_id)
           .order('date', { ascending: false });
-        
+
         if (transactionsData) {
           setTransactions(transactionsData.map(t => ({
             id: t.id,
@@ -409,12 +425,12 @@ export default function PeladaPro() {
   }, [session]);
 
 
-// Lógica para calcular o Top 3 Frequência
+  // Lógica para calcular o Top 3 Frequência
   const topPlayers = useMemo(() => {
     if (players.length === 0 || attendances.length === 0) return [];
 
     const stats = players.map(player => {
-      const appearanceCount = attendances.filter(a => 
+      const appearanceCount = attendances.filter(a =>
         a.playerIds.includes(player.id)
       ).length;
       return { ...player, appearances: appearanceCount };
@@ -437,7 +453,7 @@ export default function PeladaPro() {
   // --- Calculations ---
 
   const cashBalance = useMemo(() => {
-    return transactions.reduce((acc, t) => 
+    return transactions.reduce((acc, t) =>
       t.type === 'income' ? acc + t.amount : acc - t.amount, 0
     );
   }, [transactions]);
@@ -450,8 +466,8 @@ export default function PeladaPro() {
         .filter(t => {
           if (t.category !== 'monthly_fee' || !t.playerId || !t.date) return false;
           try {
-            const tDate = typeof t.date === 'string' 
-              ? (t.date.includes('T') ? parseISO(t.date) : new Date(t.date + 'T00:00:00')) 
+            const tDate = typeof t.date === 'string'
+              ? (t.date.includes('T') ? parseISO(t.date) : new Date(t.date + 'T00:00:00'))
               : new Date(t.date);
             return format(tDate, 'yyyy-MM') === currentMonthStr;
           } catch (e) {
@@ -465,7 +481,7 @@ export default function PeladaPro() {
   const monthlyStats = useMemo(() => {
     const activePlayers = players.filter(p => p.status === 'active' && p.isMonthly);
     const paidCount = activePlayers.filter(p => paidPlayerIds.has(String(p.id))).length;
-    
+
     return {
       total: activePlayers.length,
       paid: paidCount,
@@ -480,15 +496,15 @@ export default function PeladaPro() {
     // 1. Calcula o que REALMENTE entrou e saiu (o que está no banco)
     const totals = transactions.reduce((acc, t) => {
       try {
-        const tDate = typeof t.date === 'string' 
-          ? (t.date.includes('T') ? parseISO(t.date) : new Date(t.date + 'T00:00:00')) 
+        const tDate = typeof t.date === 'string'
+          ? (t.date.includes('T') ? parseISO(t.date) : new Date(t.date + 'T00:00:00'))
           : new Date(t.date);
-        
+
         if (format(tDate, 'yyyy-MM') === currentMonthStr) {
           if (t.type === 'income') acc.income += t.amount;
           else acc.expense += t.amount;
         }
-      } catch (e) {}
+      } catch (e) { }
       return acc;
     }, { income: 0, expense: 0 });
 
@@ -496,11 +512,11 @@ export default function PeladaPro() {
     const dividaAvulsos = attendances.reduce((total, game) => {
       try {
         const gameDate = typeof game.date === 'string' ? parseISO(game.date) : new Date(game.date);
-        
+
         // Só conta jogos deste mês
         if (format(gameDate, 'yyyy-MM') === currentMonthStr) {
           // Filtra quem estava no jogo e é avulso
-          const avulsosPresentes = game.playerIds.filter(id => 
+          const avulsosPresentes = game.playerIds.filter(id =>
             avulsos.some(a => String(a.id) === String(id))
           );
 
@@ -512,7 +528,7 @@ export default function PeladaPro() {
 
           return total + somaJogo;
         }
-      } catch (e) {}
+      } catch (e) { }
       return total;
     }, 0);
 
@@ -548,18 +564,18 @@ export default function PeladaPro() {
       alert('Você precisa estar logado para criar um grupo.');
       return;
     }
-    
+
     try {
       const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
       const inviteCode = `PELADA-${randomPart}`;
-      
+
       console.log('Tentando criar grupo:', { name, inviteCode, userId: session.user.id });
 
       const { data: groups, error: groupError } = await supabase
         .from('groups')
-        .insert([{ 
-          name: name.trim(), 
-          invite_code: inviteCode, 
+        .insert([{
+          name: name.trim(),
+          invite_code: inviteCode,
           created_by: session.user.id,
           location: 'Quadra Municipal',
           time: 'Sábado, 16h',
@@ -577,17 +593,17 @@ export default function PeladaPro() {
       if (groupData) {
         const { error: memberError } = await supabase
           .from('group_members')
-          .insert([{ 
-            group_id: groupData.id, 
-            user_id: session.user.id, 
-            role: 'admin' 
+          .insert([{
+            group_id: groupData.id,
+            user_id: session.user.id,
+            role: 'admin'
           }]);
 
         if (memberError) {
           console.error('Erro Supabase (Members):', memberError);
           throw new Error(`Erro ao entrar no grupo como admin: ${memberError.message}`);
         }
-        
+
         setGroupId(groupData.id);
         setUserRole('admin');
         setGroup({
@@ -626,10 +642,10 @@ export default function PeladaPro() {
 
       const { error: memberError } = await supabase
         .from('group_members')
-        .insert([{ 
-          group_id: groupData.id, 
-          user_id: session.user.id, 
-          role: 'member' 
+        .insert([{
+          group_id: groupData.id,
+          user_id: session.user.id,
+          role: 'member'
         }]);
 
       if (memberError) {
@@ -650,7 +666,7 @@ export default function PeladaPro() {
           throw new Error(`Erro ao entrar no grupo: ${memberError.message}`);
         }
       }
-      
+
       setGroupId(groupData.id);
       setUserRole('member');
       setGroup({
@@ -670,7 +686,7 @@ export default function PeladaPro() {
     if (userRole !== 'admin') return;
     const newGroup = { ...group, ...updates };
     setGroup(newGroup);
-    
+
     await supabase
       .from('groups')
       .update({
@@ -682,9 +698,9 @@ export default function PeladaPro() {
       .eq('id', groupId);
   };
 
-  const addPlayer = async (name: string, isMonthly: boolean, fee: number, phone: string) => { 
+  const addPlayer = async (name: string, isMonthly: boolean, fee: number, phone: string) => {
     if (userRole !== 'admin') return;
-    
+
     const { data, error } = await supabase
       .from('players')
       .insert([{
@@ -708,16 +724,16 @@ export default function PeladaPro() {
         phone: data.phone // <--- Garante que o telefone apareça na lista sem precisar recarregar
       };
       setPlayers(prev => [...prev, newPlayer].sort((a, b) => a.name.localeCompare(b.name)));
-      
+
       // Limpa o estado do telefone para o próximo cadastro
-      setNovoTelefone(''); 
+      setNovoTelefone('');
     }
   };
 
   const updatePlayer = async (id: string, updates: Partial<Player>) => {
     if (userRole !== 'admin') return;
     setPlayers(players.map(p => p.id === id ? { ...p, ...updates } : p));
-    
+
     const supabaseUpdates: any = {};
     if (updates.name !== undefined) supabaseUpdates.name = updates.name;
     if (updates.status !== undefined) supabaseUpdates.status = updates.status;
@@ -734,7 +750,7 @@ export default function PeladaPro() {
     if (userRole !== 'admin') return;
     const player = players.find(p => p.id === id);
     if (!player) return;
-    
+
     const newStatus = player.status === 'active' ? 'inactive' : 'active';
     updatePlayer(id, { status: newStatus });
   };
@@ -774,7 +790,7 @@ export default function PeladaPro() {
   const updateAttendance = async (id: string, updates: Partial<Attendance>) => {
     if (userRole !== 'admin') return;
     setAttendances(attendances.map(a => a.id === id ? { ...a, ...updates } : a));
-    
+
     const supabaseUpdates: any = {};
     if (updates.date !== undefined) supabaseUpdates.date = updates.date;
     if (updates.playerIds !== undefined) supabaseUpdates.player_ids = updates.playerIds;
@@ -827,7 +843,7 @@ export default function PeladaPro() {
   const updateTransaction = async (id: string, updates: Partial<Transaction>) => {
     if (userRole !== 'admin') return;
     setTransactions(transactions.map(t => t.id === id ? { ...t, ...updates } : t));
-    
+
     const supabaseUpdates: any = {};
     if (updates.description !== undefined) supabaseUpdates.description = updates.description;
     if (updates.amount !== undefined) supabaseUpdates.amount = updates.amount;
@@ -876,7 +892,7 @@ export default function PeladaPro() {
   if (!groupId) {
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center p-6">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100"
@@ -895,16 +911,16 @@ export default function PeladaPro() {
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Criar Novo Grupo</label>
               <div className="flex gap-2">
-                <input 
+                <input
                   id="create-group-input"
-                  type="text" 
+                  type="text"
                   placeholder="Nome da Pelada"
                   className="flex-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') createGroup(e.currentTarget.value);
                   }}
                 />
-                <button 
+                <button
                   onClick={() => {
                     const input = document.getElementById('create-group-input') as HTMLInputElement;
                     if (input.value) createGroup(input.value);
@@ -928,16 +944,16 @@ export default function PeladaPro() {
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Entrar com Código</label>
               <div className="flex gap-2">
-                <input 
+                <input
                   id="join-group-input"
-                  type="text" 
+                  type="text"
                   placeholder="Ex: AB12CD"
                   className="flex-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 transition-all uppercase"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') joinGroup(e.currentTarget.value);
                   }}
                 />
-                <button 
+                <button
                   onClick={() => {
                     const input = document.getElementById('join-group-input') as HTMLInputElement;
                     if (input.value) joinGroup(input.value);
@@ -991,16 +1007,15 @@ export default function PeladaPro() {
               <h1 className="text-xl font-bold tracking-tight">PeladaPro</h1>
             </div>
             <div className="flex items-center gap-2 px-2 mt-2">
-              <div className={`w-2 h-2 rounded-full ${
-                supabaseStatus === 'connected' ? 'bg-green-500' : 
+              <div className={`w-2 h-2 rounded-full ${supabaseStatus === 'connected' ? 'bg-green-500' :
                 supabaseStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'
-              }`} />
+                }`} />
               <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">
-                {supabaseStatus === 'connected' ? 'Supabase Online' : 
-                 supabaseStatus === 'error' ? 'Erro de Conexão' : 'Usando Placeholders'}
+                {supabaseStatus === 'connected' ? 'Supabase Online' :
+                  supabaseStatus === 'error' ? 'Erro de Conexão' : 'Usando Placeholders'}
               </span>
             </div>
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(false)}
               className="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-400"
             >
@@ -1009,26 +1024,26 @@ export default function PeladaPro() {
           </div>
 
           <nav className="space-y-2 flex-1">
- {/* Abas que TODO MUNDO vê */}
-  <SidebarItem icon={PieChart} label="Dashboard" id="dashboard" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-  <SidebarItem icon={Users} label="Jogadores" id="players" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-  <SidebarItem icon={Calendar} label="Jogos" id="games" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-  
-  {/* Abas que SÓ O ADMIN vê */}
-  {isAdmin && (
-    <>
-      <SidebarItem icon={DollarSign} label="Financeiro" id="finance" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-      <SidebarItem icon={Settings} label="Configurações" id="group" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-    </>
-  )}
-  
-  <button
-    onClick={handleLogout}
-    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-200 mt-4"
-  >
-    <LogOut size={20} />
-    <span className="font-medium">Sair</span>
-  </button>
+            {/* Abas que TODO MUNDO vê */}
+            <SidebarItem icon={PieChart} label="Dashboard" id="dashboard" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+            <SidebarItem icon={Users} label="Jogadores" id="players" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+            <SidebarItem icon={Calendar} label="Jogos" id="games" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+
+            {/* Abas que SÓ O ADMIN vê */}
+            {isAdmin && (
+              <>
+                <SidebarItem icon={DollarSign} label="Financeiro" id="finance" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+                <SidebarItem icon={Settings} label="Configurações" id="group" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
+              </>
+            )}
+
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-200 mt-4"
+            >
+              <LogOut size={20} />
+              <span className="font-medium">Sair</span>
+            </button>
           </nav>
 
           <div className="pt-6 border-t border-gray-100">
@@ -1036,9 +1051,8 @@ export default function PeladaPro() {
               <p className="text-xs text-gray-400 uppercase tracking-wider font-bold mb-2">Grupo Atual</p>
               <p className="font-bold text-sm truncate">{group.name}</p>
               <div className="mt-1 mb-2">
-                <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${
-                  userRole === 'admin' ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
-                }`}>
+                <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${userRole === 'admin' ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
                   {userRole === 'admin' ? 'Administrador' : 'Membro'}
                 </span>
               </div>
@@ -1048,7 +1062,7 @@ export default function PeladaPro() {
                   <span className="truncate">{group.location}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <a 
+                  <a
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(group.location)}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -1056,7 +1070,7 @@ export default function PeladaPro() {
                   >
                     Maps <ExternalLink size={8} />
                   </a>
-                  <a 
+                  <a
                     href={`https://waze.com/ul?q=${encodeURIComponent(group.location)}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -1076,7 +1090,7 @@ export default function PeladaPro() {
         {/* Header */}
         <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 lg:px-10 shrink-0">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(true)}
               className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
             >
@@ -1084,7 +1098,7 @@ export default function PeladaPro() {
             </button>
             <h2 className="text-lg font-bold capitalize">{activeTab === 'dashboard' ? 'Visão Geral' : activeTab}</h2>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex flex-col items-end">
               <span className="text-xs text-gray-400 font-medium">Saldo em Caixa</span>
@@ -1111,31 +1125,31 @@ export default function PeladaPro() {
               >
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <StatCard 
-                    icon={DollarSign} 
-                    label="Saldo Total" 
-                    value={`R$ ${cashBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
-                    trend="+12%" 
-                    color="bg-blue-50 text-blue-600" 
+                  <StatCard
+                    icon={DollarSign}
+                    label="Saldo Total"
+                    value={`R$ ${cashBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                    trend="+12%"
+                    color="bg-blue-50 text-blue-600"
                   />
-                  <StatCard 
-                    icon={Users} 
-                    label="Mensalistas" 
-                    value={monthlyStats.total.toString()} 
-                    subValue={`${monthlyStats.paid} pagos`} 
-                    color="bg-purple-50 text-purple-600" 
+                  <StatCard
+                    icon={Users}
+                    label="Mensalistas"
+                    value={monthlyStats.total.toString()}
+                    subValue={`${monthlyStats.paid} pagos`}
+                    color="bg-purple-50 text-purple-600"
                   />
-                  <StatCard 
-                    icon={Calendar} 
-                    label="Próximo Jogo" 
-                    value={group.time.split(',')[0]} 
-                    subValue={group.time.split(',')[1]} 
-                    color="bg-orange-50 text-orange-600" 
+                  <StatCard
+                    icon={Calendar}
+                    label="Próximo Jogo"
+                    value={group.time.split(',')[0]}
+                    subValue={group.time.split(',')[1]}
+                    color="bg-orange-50 text-orange-600"
                   >
                     <div className="flex flex-col gap-2">
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Local: {group.location}</p>
                       <div className="flex items-center gap-2">
-                        <a 
+                        <a
                           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(group.location)}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -1143,7 +1157,7 @@ export default function PeladaPro() {
                         >
                           Google Maps <ExternalLink size={10} />
                         </a>
-                        <a 
+                        <a
                           href={`https://waze.com/ul?q=${encodeURIComponent(group.location)}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -1153,7 +1167,7 @@ export default function PeladaPro() {
                         </a>
                       </div>
                       {userRole === 'admin' && (
-                        <button 
+                        <button
                           onClick={() => {
                             const gameDate = group.time.split(',')[0];
                             const gameTime = group.time.split(',')[1]?.trim() || group.time;
@@ -1167,17 +1181,17 @@ export default function PeladaPro() {
                       )}
                     </div>
                   </StatCard>
-                  <StatCard 
-                    icon={TrendingUp} 
-                    label="Presença Média" 
-                    value="85%" 
-                    trend="+5%" 
-                    color="bg-green-50 text-green-600" 
+                  <StatCard
+                    icon={TrendingUp}
+                    label="Presença Média"
+                    value="85%"
+                    trend="+5%"
+                    color="bg-green-50 text-green-600"
                   />
                 </div>
 
                 {/* CÓDIGO DO RANKING  */}
-                
+
                 <section className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center">
@@ -1196,9 +1210,8 @@ export default function PeladaPro() {
                         className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100"
                       >
                         <div className="flex items-center gap-3">
-                          <span className={`text-lg font-black ${
-                            index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : 'text-orange-500'
-                          }`}>
+                          <span className={`text-lg font-black ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : 'text-orange-500'
+                            }`}>
                             {index + 1}º
                           </span>
                           <div>
@@ -1228,7 +1241,7 @@ export default function PeladaPro() {
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F0F0" />
                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9CA3AF' }} dy={10} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9CA3AF' }} />
-                            <Tooltip 
+                            <Tooltip
                               cursor={{ fill: '#F9FAFB' }}
                               contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                             />
@@ -1244,9 +1257,8 @@ export default function PeladaPro() {
                     <div className="space-y-6">
                       {transactions.slice(0, 5).map((t) => (
                         <div key={t.id} className="flex gap-4">
-                          <div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center ${
-                            t.type === 'income' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-                          }`}>
+                          <div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center ${t.type === 'income' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                            }`}>
                             {t.type === 'income' ? <Plus size={18} /> : <ChevronRight size={18} className="rotate-90" />}
                           </div>
                           <div className="min-w-0">
@@ -1269,95 +1281,105 @@ export default function PeladaPro() {
                 </div>
               </motion.div>
             )}
-{activeTab === 'players' && (
-  <motion.div
-    key="players"
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -20 }}  
-    className="space-y-8 pb-24"
-  >
-    {/* --- SEÇÃO MENSALISTAS --- */}
-    <section>
-      <div className="flex items-center gap-2 mb-4 px-1">
-        <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
-        <h2 className="text-xl font-bold text-gray-900">Mensalistas ({mensalistas.length})</h2>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mensalistas.map(player => (
-          <div key={player.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold">
-                {player.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="font-bold text-gray-900">{player.name}</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-xs font-semibold text-blue-600">R$ {player.monthlyFee}</p>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                    paidPlayerIds.has(String(player.id)) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {paidPlayerIds.has(String(player.id)) ? 'Em Dia' : 'Pendente'}
-                  </span>
-                </div>
-              </div>
-            </div>
+            {activeTab === 'players' && (
+              <motion.div
+                key="players"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-8 pb-24"
+              >
+                {/* --- SEÇÃO MENSALISTAS --- */}
+                <section>
+                  <div className="flex items-center gap-2 mb-4 px-1">
+                    <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
+                    <h2 className="text-xl font-bold text-gray-900">Mensalistas ({mensalistas.length})</h2>
+                  </div>
 
-            {/* PROTEÇÃO AQUI: Só mostra o botão de editar se for admin */}
-            {userRole === 'admin' && (
-              <button onClick={() => { setEditingItem(player); setModalType('player'); }} className="p-2 text-gray-300 hover:text-blue-600 transition-colors">
-                <Edit size={18} />
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-    </section>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {mensalistas.map(player => (
+                      <div key={player.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center group">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold">
+                            {player.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900">{player.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-semibold text-blue-600">R$ {player.monthlyFee}</p>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${paidPlayerIds.has(String(player.id)) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                }`}>
+                                {paidPlayerIds.has(String(player.id)) ? 'Em Dia' : 'Pendente'}
+                              </span>
+                            </div>
+                          </div>
 
-    {/* --- SEÇÃO AVULSOS --- */}
-    <section className="mt-8">
-      <div className="flex items-center gap-2 mb-4 px-1">
-        <div className="w-1.5 h-6 bg-orange-500 rounded-full" />
-        <h2 className="text-xl font-bold text-gray-900">Avulsos ({avulsos.length})</h2>
-      </div>
+{!paidPlayerIds.has(String(player.id)) && (
+    <button
+      onClick={() => handleWhatsAppClick(player.phone || '', player.name)}
+      className="p-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all flex items-center justify-center border border-green-100"
+      title="Cobrar via WhatsApp"
+    >
+      <span className="text-xs font-bold uppercase px-1">Cobrar</span>
+    </button>
+  )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {avulsos.map(player => (
-          <div key={player.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center opacity-90">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center font-bold">
-                {player.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="font-bold text-gray-900">{player.name}</p>
-                <p className="text-xs font-semibold text-orange-600 uppercase">
-                  R$ {player.monthlyFee} p/ jogo
-                </p>
-              </div>
-            </div>
+                        </div>
 
-            {/* PROTEÇÃO AQUI TAMBÉM: Só mostra editar para admin */}
-            {userRole === 'admin' && (
-              <button onClick={() => { setEditingItem(player); setModalType('player'); }} className="p-2 text-gray-300 hover:text-orange-600 transition-colors">
-                <Edit size={18} />
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-    </section>
+                        {/* PROTEÇÃO AQUI: Só mostra o botão de editar se for admin */}
+                        {userRole === 'admin' && (
+                          <button onClick={() => { setEditingItem(player); setModalType('player'); }} className="p-2 text-gray-300 hover:text-blue-600 transition-colors">
+                            <Edit size={18} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
 
-    {/* Botão Novo Jogador flutuante para Admin */}
-    {userRole === 'admin' && (
-      <button
-        onClick={() => { setEditingItem(null); setModalType('player'); }}
-        className="fixed bottom-6 right-6 bg-black text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 z-50 font-bold hover:scale-105 active:scale-95 transition-transform"
-      >
-        <Plus size={20} />
-        Novo Jogador
-      </button>
-    )}
+                {/* --- SEÇÃO AVULSOS --- */}
+                <section className="mt-8">
+                  <div className="flex items-center gap-2 mb-4 px-1">
+                    <div className="w-1.5 h-6 bg-orange-500 rounded-full" />
+                    <h2 className="text-xl font-bold text-gray-900">Avulsos ({avulsos.length})</h2>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {avulsos.map(player => (
+                      <div key={player.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center opacity-90">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center font-bold">
+                            {player.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900">{player.name}</p>
+                            <p className="text-xs font-semibold text-orange-600 uppercase">
+                              R$ {player.monthlyFee} p/ jogo
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* PROTEÇÃO AQUI TAMBÉM: Só mostra editar para admin */}
+                        {userRole === 'admin' && (
+                          <button onClick={() => { setEditingItem(player); setModalType('player'); }} className="p-2 text-gray-300 hover:text-orange-600 transition-colors">
+                            <Edit size={18} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Botão Novo Jogador flutuante para Admin */}
+                {userRole === 'admin' && (
+                  <button
+                    onClick={() => { setEditingItem(null); setModalType('player'); }}
+                    className="fixed bottom-6 right-6 bg-black text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 z-50 font-bold hover:scale-105 active:scale-95 transition-transform"
+                  >
+                    <Plus size={20} />
+                    Novo Jogador
+                  </button>
+                )}
               </motion.div>
             )}
 
@@ -1375,7 +1397,7 @@ export default function PeladaPro() {
                     <p className="text-gray-500">Controle quem compareceu a cada partida</p>
                   </div>
                   {userRole === 'admin' && (
-                    <button 
+                    <button
                       onClick={() => {
                         setEditingItem(null);
                         setModalType('attendance');
@@ -1389,52 +1411,76 @@ export default function PeladaPro() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {attendances.map((att) => (
-                    <div key={att.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-50">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2 text-gray-500">
-                          <Calendar size={16} />
-                          <span className="text-sm font-bold">{format(parseISO(att.date), "dd 'de' MMMM", { locale: ptBR })}</span>
-                        </div>
-                        <span className="text-xs bg-gray-100 px-2 py-1 rounded-lg font-bold text-gray-500 uppercase">Finalizado</span>
-                      </div>
-                      
-                      <div className="space-y-4 mb-6">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Presentes</span>
-                          <span className="font-bold text-green-600">{att.playerIds.length}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Faltas</span>
-                          <span className="font-bold text-red-600">{att.absentIds.length}</span>
-                        </div>
-                      </div>
+                  {attendances.map((att) => {
+                    // 1. Criamos a lógica da data aqui em cima
+                    const hoje = new Date();
+                    hoje.setHours(0, 0, 0, 0);
 
-                      <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-50">
-                        {userRole === 'admin' ? (
-                          <>
-                            <button 
-                              onClick={() => {
-                                setEditingItem(att);
-                                setModalType('attendance');
-                              }}
-                              className="text-sm font-bold text-gray-500 hover:text-black transition-colors"
-                            >
-                              Editar
-                            </button>
-                            <button 
-                              onClick={() => deleteAttendance(att.id)}
-                              className="text-sm font-bold text-red-400 hover:text-red-600 transition-colors"
-                            >
-                              Excluir
-                            </button>
-                          </>
-                        ) : (
-                          <span className="text-xs text-gray-400 italic">Apenas leitura</span>
-                        )}
+                    const dataPelada = parseISO(att.date);
+                    dataPelada.setHours(0, 0, 0, 0);
+
+                    const isFinalizado = dataPelada < hoje;
+
+                    // 2. Agora damos o 'return' do desenho do card
+                    return (
+                      <div key={att.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-50">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2 text-gray-500">
+                            <Calendar size={16} />
+                            <span className="text-sm font-bold">
+                              {format(parseISO(att.date), "dd 'de' MMMM", { locale: ptBR })}
+                            </span>
+                          </div>
+
+                          {/* Aqui é onde a mágica acontece: */}
+                          {isFinalizado ? (
+                            <span className="text-xs bg-gray-100 px-2 py-1 rounded-lg font-bold text-gray-500 uppercase">
+                              Finalizado
+                            </span>
+                          ) : (
+                            <span className="text-xs bg-green-100 px-2 py-1 rounded-lg font-bold text-green-600 uppercase">
+                              Agendado
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="space-y-4 mb-6">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Presentes</span>
+                            <span className="font-bold text-green-600">{att.playerIds.length}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Faltas</span>
+                            <span className="font-bold text-red-600">{att.absentIds.length}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-50">
+                          {userRole === 'admin' ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setEditingItem(att);
+                                  setModalType('attendance');
+                                }}
+                                className="text-sm font-bold text-gray-500 hover:text-black transition-colors"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => deleteAttendance(att.id)}
+                                className="text-sm font-bold text-red-400 hover:text-red-600 transition-colors"
+                              >
+                                Excluir
+                              </button>
+                            </>
+                          ) : (
+                            <span className="text-xs text-gray-400 italic">Apenas leitura</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {attendances.length === 0 && (
                     <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
                       <Calendar className="mx-auto text-gray-200 mb-2" size={48} />
@@ -1460,7 +1506,7 @@ export default function PeladaPro() {
                   </div>
                   {userRole === 'admin' && (
                     <div className="flex gap-2">
-                      <button 
+                      <button
                         onClick={() => {
                           setEditingItem(null);
                           setModalType('transaction');
@@ -1484,12 +1530,11 @@ export default function PeladaPro() {
                         {transactions.map((t) => (
                           <div key={t.id} className="p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
                             <div className="flex items-center gap-4">
-                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                                t.type === 'income' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-                              }`}>
-                                {t.category === 'monthly_fee' ? <Users size={20} /> : 
-                                 t.category === 'field_rent' ? <MapPin size={20} /> : 
-                                 <DollarSign size={20} />}
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${t.type === 'income' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                                }`}>
+                                {t.category === 'monthly_fee' ? <Users size={20} /> :
+                                  t.category === 'field_rent' ? <MapPin size={20} /> :
+                                    <DollarSign size={20} />}
                               </div>
                               <div>
                                 <p className="font-bold">{t.description}</p>
@@ -1502,7 +1547,7 @@ export default function PeladaPro() {
                               </div>
                               {userRole === 'admin' && (
                                 <div className="flex items-center gap-1 ml-2">
-                                  <button 
+                                  <button
                                     onClick={() => {
                                       setEditingItem(t);
                                       setModalType('transaction');
@@ -1513,13 +1558,13 @@ export default function PeladaPro() {
                                   </button>
                                   {deletingId === t.id ? (
                                     <div className="flex items-center gap-2">
-                                      <button 
+                                      <button
                                         onClick={() => deleteTransaction(t.id)}
                                         className="text-[10px] bg-red-500 text-white px-2 py-1 rounded font-bold"
                                       >
                                         Confirmar
                                       </button>
-                                      <button 
+                                      <button
                                         onClick={() => setDeletingId(null)}
                                         className="text-[10px] bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold"
                                       >
@@ -1527,7 +1572,7 @@ export default function PeladaPro() {
                                       </button>
                                     </div>
                                   ) : (
-                                    <button 
+                                    <button
                                       onClick={() => setDeletingId(t.id)}
                                       className="p-1 text-gray-300 hover:text-red-600 transition-colors"
                                     >
@@ -1583,9 +1628,9 @@ export default function PeladaPro() {
                         </div>
                         <div className="pt-4 border-t border-gray-50">
                           <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                            <div 
-                              className="bg-black h-full transition-all duration-500" 
-                              style={{ width: `${(monthlyStats.paid / (monthlyStats.total || 1)) * 100}%` }} 
+                            <div
+                              className="bg-black h-full transition-all duration-500"
+                              style={{ width: `${(monthlyStats.paid / (monthlyStats.total || 1)) * 100}%` }}
                             />
                           </div>
                           <p className="text-[10px] text-gray-400 mt-2 text-right font-bold uppercase tracking-wider">
@@ -1616,8 +1661,8 @@ export default function PeladaPro() {
                     <div className="space-y-6">
                       <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">Nome do Grupo</label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={group.name}
                           onChange={(e) => updateGroupSettings({ name: e.target.value })}
                           className="w-full px-4 py-3 rounded-xl border border-gray-100 focus:border-black outline-none transition-colors font-bold"
@@ -1625,15 +1670,15 @@ export default function PeladaPro() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">Localização</label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={group.location}
                           onChange={(e) => updateGroupSettings({ location: e.target.value })}
                           className="w-full px-4 py-3 rounded-xl border border-gray-100 focus:border-black outline-none transition-colors font-bold"
                         />
                         {group.location && (
                           <div className="flex items-center gap-4 mt-2">
-                            <a 
+                            <a
                               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(group.location)}`}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -1641,7 +1686,7 @@ export default function PeladaPro() {
                             >
                               <MapPin size={12} /> Testar Google Maps
                             </a>
-                            <a 
+                            <a
                               href={`https://waze.com/ul?q=${encodeURIComponent(group.location)}`}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -1654,8 +1699,8 @@ export default function PeladaPro() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">Horário</label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={group.time}
                           onChange={(e) => updateGroupSettings({ time: e.target.value })}
                           className="w-full px-4 py-3 rounded-xl border border-gray-100 focus:border-black outline-none transition-colors font-bold"
@@ -1663,8 +1708,8 @@ export default function PeladaPro() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-400 uppercase tracking-wider">Custo da Quadra (R$)</label>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           value={isNaN(group.fieldCost) ? '' : group.fieldCost}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -1708,7 +1753,7 @@ export default function PeladaPro() {
                           <h3 className="text-3xl font-mono font-bold tracking-tighter">
                             {group.inviteCode || '...'}
                           </h3>
-                          <button 
+                          <button
                             onClick={() => {
                               if (group.inviteCode) {
                                 navigator.clipboard.writeText(group.inviteCode);
@@ -1755,9 +1800,9 @@ export default function PeladaPro() {
                 <div className="flex items-center justify-between mb-6 sm:mb-8 shrink-0">
                   <h3 className="text-xl font-bold">
                     {editingItem ? 'Editar' : 'Novo'} {
-                      modalType === 'player' ? 'Jogador' : 
-                      modalType === 'attendance' ? 'Jogo' : 
-                      'Transação'
+                      modalType === 'player' ? 'Jogador' :
+                        modalType === 'attendance' ? 'Jogo' :
+                          'Transação'
                     }
                   </h3>
                   <button onClick={() => setModalType(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -1767,37 +1812,37 @@ export default function PeladaPro() {
 
                 <div className="flex-1 overflow-y-auto pr-1 -mr-1">
                   {modalType === 'player' && (
-                    <PlayerForm 
-                      initialData={editingItem} 
+                    <PlayerForm
+                      initialData={editingItem}
                       onSubmit={(data) => {
                         if (editingItem) updatePlayer(editingItem.id, data);
                         else addPlayer(data.name, data.isMonthly, data.monthlyFee, novoTelefone);
                         setModalType(null);
-                      }} 
+                      }}
                     />
                   )}
 
                   {modalType === 'attendance' && (
-                    <AttendanceForm 
+                    <AttendanceForm
                       players={players}
-                      initialData={editingItem} 
+                      initialData={editingItem}
                       onSubmit={(data) => {
                         if (editingItem) updateAttendance(editingItem.id, data);
                         else recordAttendance(data.date, data.playerIds, data.absentIds);
                         setModalType(null);
-                      }} 
+                      }}
                     />
                   )}
 
                   {modalType === 'transaction' && (
-                    <TransactionForm 
+                    <TransactionForm
                       players={players}
-                      initialData={editingItem} 
+                      initialData={editingItem}
                       onSubmit={(data) => {
                         if (editingItem) updateTransaction(editingItem.id, data);
                         else addTransaction(data.description, data.amount, data.type, data.category, data.playerId);
                         setModalType(null);
-                      }} 
+                      }}
                     />
                   )}
                 </div>
@@ -1818,19 +1863,19 @@ function PlayerForm({ initialData, onSubmit }: { initialData?: Player, onSubmit:
   const [novoTelefone, setNovoTelefone] = useState(initialData?.phone || '');
 
   return (
-    <form 
-      onSubmit={(e) => { 
-        e.preventDefault(); 
-        onSubmit({ name, isMonthly, monthlyFee: fee, phone: novoTelefone }); 
-      }} 
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit({ name, isMonthly, monthlyFee: fee, phone: novoTelefone });
+      }}
       className="space-y-6"
     >
       <div className="space-y-2">
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Nome</label>
-        <input 
+        <input
           autoFocus
-          type="text" 
-          value={name} 
+          type="text"
+          value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full px-4 py-3 rounded-xl border border-gray-100 focus:border-black outline-none transition-colors font-bold"
           required
@@ -1838,14 +1883,14 @@ function PlayerForm({ initialData, onSubmit }: { initialData?: Player, onSubmit:
       </div>
 
       <div className="flex items-center gap-4">
-        <button 
+        <button
           type="button"
           onClick={() => setIsMonthly(true)}
           className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isMonthly ? 'bg-black text-white border-black' : 'border-gray-100 text-gray-400'}`}
         >
           Mensalista
         </button>
-        <button 
+        <button
           type="button"
           onClick={() => setIsMonthly(false)}
           className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${!isMonthly ? 'bg-black text-white border-black' : 'border-gray-100 text-gray-400'}`}
@@ -1856,9 +1901,9 @@ function PlayerForm({ initialData, onSubmit }: { initialData?: Player, onSubmit:
 
       <div className="space-y-2">
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Valor (R$)</label>
-        <input 
-          type="number" 
-          value={isNaN(fee) ? '' : fee} 
+        <input
+          type="number"
+          value={isNaN(fee) ? '' : fee}
           onChange={(e) => {
             const val = parseFloat(e.target.value);
             setFee(isNaN(val) ? 0 : val);
@@ -1871,8 +1916,8 @@ function PlayerForm({ initialData, onSubmit }: { initialData?: Player, onSubmit:
       {/* --- NOVO CAMPO DE WHATSAPP --- */}
       <div className="space-y-2">
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">WhatsApp</label>
-        <input 
-          type="text" 
+        <input
+          type="text"
           placeholder="(00) 00000-0000"
           value={novoTelefone}
           onChange={(e) => setNovoTelefone(e.target.value)}
@@ -1908,9 +1953,9 @@ function AttendanceForm({ players, initialData, onSubmit }: { players: Player[],
     <form onSubmit={(e) => { e.preventDefault(); onSubmit({ date, playerIds: presentIds, absentIds }); }} className="space-y-6">
       <div className="space-y-2">
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Data do Jogo</label>
-        <input 
-          type="date" 
-          value={date} 
+        <input
+          type="date"
+          value={date}
           onChange={(e) => setDate(e.target.value)}
           className="w-full px-4 py-3 rounded-xl border border-gray-100 focus:border-black outline-none transition-colors font-bold"
           required
@@ -1920,14 +1965,13 @@ function AttendanceForm({ players, initialData, onSubmit }: { players: Player[],
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Chamada</label>
         <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
           {players.filter(p => p.status === 'active').map(player => (
-            <div 
-              key={player.id} 
+            <div
+              key={player.id}
               onClick={() => togglePlayer(player.id)}
-              className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
-                presentIds.includes(player.id) ? 'bg-green-50 border-green-200' : 
-                absentIds.includes(player.id) ? 'bg-red-50 border-red-200' : 
-                'border-gray-100'
-              }`}
+              className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${presentIds.includes(player.id) ? 'bg-green-50 border-green-200' :
+                absentIds.includes(player.id) ? 'bg-red-50 border-red-200' :
+                  'border-gray-100'
+                }`}
             >
               <span className="font-bold text-sm">{player.name}</span>
               <div className="flex items-center gap-2">
@@ -1966,20 +2010,20 @@ function TransactionForm({ players, initialData, onSubmit }: { players: Player[]
   };
 
   return (
-    <form onSubmit={(e) => { 
-      e.preventDefault(); 
-      onSubmit({ 
-        description, 
-        amount, 
-        type, 
-        category, 
-        playerId: category === 'monthly_fee' ? (playerId || null) : null 
-      }); 
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      onSubmit({
+        description,
+        amount,
+        type,
+        category,
+        playerId: category === 'monthly_fee' ? (playerId || null) : null
+      });
     }} className="space-y-6">
       <div className="space-y-2">
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Categoria</label>
-        <select 
-          value={category} 
+        <select
+          value={category}
           onChange={(e) => {
             const newCat = e.target.value as any;
             setCategory(newCat);
@@ -1999,8 +2043,8 @@ function TransactionForm({ players, initialData, onSubmit }: { players: Player[]
       {category === 'monthly_fee' && (
         <div className="space-y-2">
           <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Jogador</label>
-          <select 
-            value={playerId} 
+          <select
+            value={playerId}
             onChange={(e) => handlePlayerChange(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-100 focus:border-black outline-none transition-colors font-bold"
             required
@@ -2015,24 +2059,24 @@ function TransactionForm({ players, initialData, onSubmit }: { players: Player[]
 
       <div className="space-y-2">
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Descrição</label>
-        <input 
+        <input
           autoFocus
-          type="text" 
-          value={description} 
+          type="text"
+          value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full px-4 py-3 rounded-xl border border-gray-100 focus:border-black outline-none transition-colors font-bold"
           required
         />
       </div>
       <div className="flex items-center gap-4">
-        <button 
+        <button
           type="button"
           onClick={() => setType('income')}
           className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${type === 'income' ? 'bg-green-600 text-white border-green-600' : 'border-gray-100 text-gray-400'}`}
         >
           Entrada
         </button>
-        <button 
+        <button
           type="button"
           onClick={() => setType('expense')}
           className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${type === 'expense' ? 'bg-red-600 text-white border-red-600' : 'border-gray-100 text-gray-400'}`}
@@ -2042,9 +2086,9 @@ function TransactionForm({ players, initialData, onSubmit }: { players: Player[]
       </div>
       <div className="space-y-2">
         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Valor (R$)</label>
-        <input 
-          type="number" 
-          value={isNaN(amount) ? '' : amount} 
+        <input
+          type="number"
+          value={isNaN(amount) ? '' : amount}
           onChange={(e) => {
             const val = parseFloat(e.target.value);
             setAmount(isNaN(val) ? 0 : val);
@@ -2063,12 +2107,12 @@ function TransactionForm({ players, initialData, onSubmit }: { players: Player[]
 
 // --- Subcomponents ---
 
-function StatCard({ icon: Icon, label, value, subValue, trend, color, children }: { 
-  icon: any, 
-  label: string, 
-  value: string, 
-  subValue?: string, 
-  trend?: string, 
+function StatCard({ icon: Icon, label, value, subValue, trend, color, children }: {
+  icon: any,
+  label: string,
+  value: string,
+  subValue?: string,
+  trend?: string,
   color: string,
   children?: React.ReactNode
 }) {
