@@ -53,7 +53,7 @@ import {
 } from 'recharts';
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-
+import { ModeToggle } from "./components/ModeToggle";
 
 // --- Types ---
 
@@ -891,7 +891,7 @@ export default function PeladaPro() {
 
   if (!groupId) {
     return (
-      <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#0B0E14] flex items-center justify-center p-6 text-slate-100">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -902,8 +902,8 @@ export default function PeladaPro() {
               <TrendingUp size={28} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Bem-vindo!</h1>
-              <p className="text-gray-500 text-sm">Crie ou entre em uma pelada</p>
+              <h1 className="text-2xl font-bold tracking-tight text-white">Bem-vindo!</h1>
+              <p className="text-slate-400 text-sm">Crie ou entre em uma pelada</p>
             </div>
           </div>
 
@@ -966,6 +966,7 @@ export default function PeladaPro() {
             </div>
           </div>
 
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 mt-8 text-gray-400 hover:text-red-500 transition-all text-sm font-medium"
@@ -979,7 +980,7 @@ export default function PeladaPro() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] flex font-sans text-gray-900">
+    <div className="min-h-screen bg-background flex font-sans text-gray-900">
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -1006,6 +1007,11 @@ export default function PeladaPro() {
               </div>
               <h1 className="text-xl font-bold tracking-tight">PeladaPro</h1>
             </div>
+
+            <div className="px-2 mb-4">
+              <ModeToggle />
+            </div>
+
             <div className="flex items-center gap-2 px-2 mt-2">
               <div className={`w-2 h-2 rounded-full ${supabaseStatus === 'connected' ? 'bg-green-500' :
                 supabaseStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'
@@ -1192,14 +1198,14 @@ export default function PeladaPro() {
 
                 {/* CÓDIGO DO RANKING  */}
 
-                <section className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                <section className="bg-[#161B22] p-6 rounded-3xl border border-[#30363D] shadow-sm">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center">
                       <Users size={24} />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">Ranking de Frequência</h2>
-                      <p className="text-sm text-gray-500">Jogadores mais presentes nas partidas</p>
+                      <h2 className="text-xl font-bold text-slate-50">Ranking de Frequência</h2>
+                      <p className="text-sm text-slate-400">Jogadores mais presentes nas partidas</p>
                     </div>
                   </div>
 
@@ -1207,7 +1213,7 @@ export default function PeladaPro() {
                     {topPlayers.map((player, index) => (
                       <div
                         key={player.id}
-                        className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100"
+                        className="flex items-center justify-between p-4 rounded-2xl bg-[#0B0E14] border border-[#30363D]"
                       >
                         <div className="flex items-center gap-3">
                           <span className={`text-lg font-black ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : 'text-orange-500'
@@ -1215,8 +1221,8 @@ export default function PeladaPro() {
                             {index + 1}º
                           </span>
                           <div>
-                            <p className="font-bold text-gray-900">{player.name}</p>
-                            <p className="text-xs text-gray-500">{player.appearances} partidas</p>
+                            <p className="font-bold text-slate-100">{player.name}</p>
+                            <p className="text-xs text-slate-400">{player.appearances} partidas</p>
                           </div>
                         </div>
                         {index === 0 && <span className="text-xl">👑</span>}
@@ -1293,18 +1299,18 @@ export default function PeladaPro() {
                 <section>
                   <div className="flex items-center gap-2 mb-4 px-1">
                     <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
-                    <h2 className="text-xl font-bold text-gray-900">Mensalistas ({mensalistas.length})</h2>
+                    <h2 className="text-xl font-bold text-slate-100">Mensalistas ({mensalistas.length})</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {mensalistas.map(player => (
-                      <div key={player.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center group">
+                      <div key={player.id} className="bg-[#161B22] p-5 rounded-3xl border border-[#30363D] shadow-sm flex justify-between items-center group">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold">
                             {player.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-bold text-gray-900">{player.name}</p>
+                            <p className="font-bold text-slate-100">{player.name}</p>
                             <div className="flex items-center gap-2">
                               <p className="text-xs font-semibold text-blue-600">R$ {player.monthlyFee}</p>
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${paidPlayerIds.has(String(player.id)) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -1314,15 +1320,15 @@ export default function PeladaPro() {
                             </div>
                           </div>
 
-{!paidPlayerIds.has(String(player.id)) && (
-    <button
-      onClick={() => handleWhatsAppClick(player.phone || '', player.name)}
-      className="p-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all flex items-center justify-center border border-green-100"
-      title="Cobrar via WhatsApp"
-    >
-      <span className="text-xs font-bold uppercase px-1">Cobrar</span>
-    </button>
-  )}
+                          {!paidPlayerIds.has(String(player.id)) && (
+                            <button
+                              onClick={() => handleWhatsAppClick(player.phone || '', player.name)}
+                              className="p-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all flex items-center justify-center border border-green-100"
+                              title="Cobrar via WhatsApp"
+                            >
+                              <span className="text-xs font-bold uppercase px-1">Cobrar</span>
+                            </button>
+                          )}
 
                         </div>
 
@@ -1341,7 +1347,9 @@ export default function PeladaPro() {
                 <section className="mt-8">
                   <div className="flex items-center gap-2 mb-4 px-1">
                     <div className="w-1.5 h-6 bg-orange-500 rounded-full" />
-                    <h2 className="text-xl font-bold text-gray-900">Avulsos ({avulsos.length})</h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">
+                      Avulsos ({avulsos.length})
+                    </h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
